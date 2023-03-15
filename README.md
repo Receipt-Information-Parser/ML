@@ -11,3 +11,4 @@
 * https://wandb.ai/wandb-data-science/layoutlm_sroie_demo/reports/Information-Extraction-from-Scanned-Receipts-Fine-tuning-LayoutLM-on-SROIE--VmlldzoxMjI5NzE2
 * https://yunwoong.tistory.com/148
 * https://velog.io/@shasha/%ED%95%9C%EA%B8%80-OCR-CRNN-Model-%ED%95%99%EC%8A%B5
+* https://yunwoong.tistory.com/210
