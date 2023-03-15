@@ -12,4 +12,4 @@
 * https://yunwoong.tistory.com/148
 * https://velog.io/@shasha/%ED%95%9C%EA%B8%80-OCR-CRNN-Model-%ED%95%99%EC%8A%B5
 * https://yunwoong.tistory.com/210
-* https://medium.com/@msmapark2/character-region-awareness-for-text-detection-craft-paper-%EB%B6%84%EC%84%9D-da987b32609c
+* https://medium.com/@msmapark2/character-region-awareness-for-text-detection-craft-paper-%EB%B6%84%EC%84%9D-da987b32609c (CRAFT 논문 리뷰)
