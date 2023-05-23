@@ -8,6 +8,7 @@ import requests
 import time
 import json
 import io
+import pandas as pd
 
 
 class Predict:
@@ -192,7 +193,7 @@ class Predict:
         #이미지 위에 각 텍스트의 바운딩박스 위치별로 layout을 지정하고 색을 지정하여 결과값을 반환
         pre=0
         real_output=[]
-        print(len(true_predictions),true_predictions)
+        #print(len(true_predictions),true_predictions)
         for prediction, box in zip(true_predictions, true_boxes):
             
             #if box!=pre and prediction!=-100:
@@ -202,5 +203,68 @@ class Predict:
             draw.text((box[0] + 10, box[1] - 10), text=predicted_label, fill=label2color[predicted_label], font=font)
             
             pre=box
-        self.image.save(os.path.join('/home/guest/ML/code/predict_data/output/','output.jpeg'))
+            
+        # self.image.save(os.path.join('/home/guest/ML/code/predict_data/output/','output.jpeg'))
+        #true_boxes,true_predictions,text
+        return true_boxes,true_predictions,preprocess_data['words']
+    def predict2output(self,true_boxes,true_predictions,text):
+        #겹치는 예측값 제거 
+        real_word_box=[]
+        pre=0
+        for i in range(len(true_boxes)):
+            if sum(true_boxes[i])!=pre:
+                real_word_box.append(true_predictions[i])
+                pre=sum(true_boxes[i])
+            else:
+                continue
+        output_dict={}
+
+        for i in self.label_list:
+            output_dict[i]=[]
+     
+        # 예측값에 따라 dict 형태로 예측값 저장
+
+        for i in range(len(real_word_box)):
+            if str(real_word_box[i])=='others':
+                output_dict['others'].append(text[i])
+
+            elif str(real_word_box[i])=='key':
+                output_dict['key'].append(text[i])
+            elif str(real_word_box[i])=='value':
+                output_dict['value'].append(text[i])
+            elif str(real_word_box[i])=='total':
+                output_dict['total'].append(text[i])
+            elif str(real_word_box[i])=='column_name':
+                output_dict['column_name'].append(text[i])
+            elif str(real_word_box[i])=='item':
+                output_dict['item'].append(text[i])
+            elif str(real_word_box[i])=='count':
+                output_dict['count'].append(text[i])
+            elif str(real_word_box[i])=='money':
+                output_dict['money'].append(text[i])
+        csv_dict={}
+        for i in range(len(output_dict['column_name'])):
+            if i==0:
+                csv_dict[i]=output_dict['item']
+            elif i==1:
+                csv_dict[i]=output_dict['count']
+            elif i ==2:
+                csv_dict[i]=output_dict['money']
                 
+        output_dict['column_name'] = [output_dict['column_name'][i] + output_dict['column_name'][i+1] for i in range(0, len(output_dict['column_name']), 2)]
+
+        # Find the maximum length among the lists
+        max_length = max(len(lst) for lst in csv_dict.values())
+
+        # Fill the lists with shorter lengths using NaN
+        data_filled = {key: lst + [float('nan')] * (max_length - len(lst)) for key, lst in csv_dict.items()}
+        column_names = output_dict['column_name']
+
+        df = pd.DataFrame.from_dict(data_filled)
+        df.columns = column_names
+
+        #print(df)
+
+        return output_dict,df.to_csv(index=False)
+
+                        
