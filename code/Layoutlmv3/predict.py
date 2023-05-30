@@ -59,7 +59,7 @@ class Predict:
         response=requests.post(self.api_url, headers=headers, data = payload)
         result=response.json()
 
-        print(result)
+        #print(result)
         # naver ocr api 의 반환값으로 이미지 데이터에서 테이블 형식의 데이터를 저장해준다.
         images=result['images'][0]
         result_data_text=[]
@@ -121,7 +121,7 @@ class Predict:
                 if len(embedding_loaction) <= index +1:
                     break
                 else:
-                    if abs(embedding_loaction[index][2]-embedding_loaction[index+1][0]) < 10:
+                    if abs(embedding_loaction[index][2]-embedding_loaction[index+1][0]) < 4:
                         embedding_loaction[index+1]=[embedding_loaction[index][0],embedding_loaction[index][1],
                                                 embedding_loaction[index+1][2],embedding_loaction[index+1][3]]
                         del embedding_loaction[index]
@@ -130,6 +130,10 @@ class Predict:
                         del text[index]
 
                         del table_lable[index+1]
+                        
+                        
+                        
+        
 
         temp={}
         temp['id'] =0
@@ -160,7 +164,7 @@ class Predict:
         predictions = outputs.logits.argmax(-1).squeeze().tolist()
         token_boxes = encoded_inputs.bbox.squeeze().tolist()
         width, height = self.image.size
-        print('predictions',len(predictions),predictions)
+        #print('predictions',len(predictions),predictions)
 
 
         def unnormalize_box(bbox, width, height):
@@ -217,10 +221,70 @@ class Predict:
                 pre=sum(true_boxes[i])
             else:
                 continue
-        output_dict={}
+            
+            
+            
+            
+        
+        
+        combined_value = []
+        current_value = ''
+        current_x_start = None
+        current_x_end = None
+        current_y_start = None
+        current_y_end = None
+        current_layout = None
 
+        for value, layout, position in zip(text, real_word_box, true_boxes):
+            if current_layout and layout != current_layout:
+                combined_value.append({
+                    'value': current_value.strip(),
+                    'position': [current_x_start, current_y_start, current_x_end, current_y_end],
+                    'layout': current_layout
+                })
+                current_value = ''
+            
+            current_value += value + ' '
+            current_x_start = position[0] if current_x_start is None else min(current_x_start, position[0])
+            current_x_end = position[2] if current_x_end is None else max(current_x_end, position[2])
+            current_y_start = position[1] if current_y_start is None else min(current_y_start, position[1])
+            current_y_end = position[3] if current_y_end is None else max(current_y_end, position[3])
+            current_layout = layout
+
+        combined_value.append({
+            'value': current_value.strip(),
+            'position': [current_x_start, current_y_start, current_x_end, current_y_end],
+            'layout': current_layout
+        })
+        #print(combined_value)
+        
+        
+        
+        value = []
+        position = []
+        layout = []
+
+        for item in combined_value:
+            value.append(item['value'])
+            position.append(item['position'])
+            layout.append(item['layout'])
+
+        text=value
+        real_word_box=layout
+        true_boxes=position
+        
+        
+        output_dict={}
         for i in self.label_list:
             output_dict[i]=[]
+     
+     
+     
+     
+        #print(len(text),text)
+        #print(len(real_word_box),real_word_box)
+        #print(len(true_boxes),true_boxes)
+     
      
         # 예측값에 따라 dict 형태로 예측값 저장
 
@@ -242,7 +306,12 @@ class Predict:
                 output_dict['count'].append(text[i])
             elif str(real_word_box[i])=='money':
                 output_dict['money'].append(text[i])
+
+        
+                
+        '''                
         csv_dict={}
+        
         for i in range(len(output_dict['column_name'])):
             if i==0:
                 csv_dict[i]=output_dict['item']
@@ -250,21 +319,101 @@ class Predict:
                 csv_dict[i]=output_dict['count']
             elif i ==2:
                 csv_dict[i]=output_dict['money']
+        
+        '''
+        
+        # 2개씩 나누기
+        #print('2개로 나누기 이전의 ',output_dict['column_name'])
+        #output_dict['column_name'] = result = [output_dict['column_name'][0][i:i+2] for i in range(0, len(output_dict['column_name'][0]), 2)]
+
+        #new process for ':' problem 
+        new_key = []
+        previous_word = None
+
+        '''
+        for word in output_dict['key']:
+            if ':' in word:
+                previous_word = word.split(':')[0].strip()
+            else:
+                if previous_word:
+                    word = previous_word + word
+                new_key.append(word)
+
+        output_dict['key'] = new_key
+        '''
+        
+        #col_na=output_dict['column_name']
+        #print('col_na',col_na)
+        
+        #output_dict['column_name']=[col_na[i] + col_na[i+1] for i in range(0, len(col_na), 2)]
+
+        print("output is : \n",output_dict)
+        try:
+            key_list=output_dict['key']
+            value_list = output_dict['value']
+            combine_dict={}
+            for i in range(len(key_list)):
+                combine_dict[key_list[i]]=value_list[i]
+            
+            output_dict['key_value']=[combine_dict]
+            del output_dict['key']
+            del output_dict['value']
+            
+        except Exception as e:
+            print(f"excetion occurred: {str(e)}")
+        
+        output_dict['csv']=[]
+            
+        try:
+            new_dict = {
+                #'column_name': output_dict['column_name'],
+                'item': output_dict['item'],
+                'count': output_dict['count'],
+                'money': output_dict['money']
+            }
+            #품목 수량 단위 금액 
+            max_length = max( len(new_dict['item']), len(new_dict['count']), len(new_dict['money']))
+            #len(new_dict['column_name']),
+            
+            #new_dict['column_name'] += [''] * (max_length - len(new_dict['column_name']))
+            print('max_length',max_length)
+            for key in ['item', 'count', 'money']:
+                new_dict[key] += [''] * (max_length - len(new_dict[key]))
+            print('new_dict',new_dict)
+            
+            for indx in range(len(new_dict['money'])):
+                new_dict['money'][indx] = new_dict['money'][indx].replace(',', '')  # Remove commas from the string
+                new_dict['money'][indx] = new_dict['money'][indx].replace('.', '')
+                new_dict['money'][indx] = new_dict['money'][indx].replace('원', '')  # Remove the '원' symbol from the string
+                new_dict['money'][indx]=int(new_dict['money'][indx])
                 
-        output_dict['column_name'] = [output_dict['column_name'][i] + output_dict['column_name'][i+1] for i in range(0, len(output_dict['column_name']), 2)]
-
-        # Find the maximum length among the lists
-        max_length = max(len(lst) for lst in csv_dict.values())
-
-        # Fill the lists with shorter lengths using NaN
-        data_filled = {key: lst + [float('nan')] * (max_length - len(lst)) for key, lst in csv_dict.items()}
-        column_names = output_dict['column_name']
-
-        df = pd.DataFrame.from_dict(data_filled)
-        df.columns = column_names
-
-        #print(df)
-
-        return output_dict,df.to_csv(index=False)
-
+            
+            #col_name=new_dict['column_name']
+            #del new_dict['column_name']
                         
+            col_name=['품목','수량','금액']
+            df=pd.DataFrame.from_dict(new_dict)
+
+                
+            df.columns=col_name
+            csv_string = df.to_csv(index=False)
+            print(df)
+            print('output_dict',output_dict)
+            if len(output_dict['total']) ==0:
+                new_notnull_df=df.dropna()
+                print('new_notnull_df',new_notnull_df)
+                output_dict['total']=sum(new_notnull_df['금액'])
+            
+            # Return output_dict and DataFrame as CSV string
+            
+            output_dict['csv']=csv_string
+            return output_dict
+
+        except Exception as e:
+            # Handle the exception
+            print("There is empty output in the predict data (model accuracy is not good)")
+            print(f"An exception occurred: {str(e)}")
+            return output_dict
+
+
+                                
