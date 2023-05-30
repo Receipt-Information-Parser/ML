@@ -278,13 +278,7 @@ class Predict:
         for i in self.label_list:
             output_dict[i]=[]
      
-     
-     
-     
-        #print(len(text),text)
-        #print(len(real_word_box),real_word_box)
-        #print(len(true_boxes),true_boxes)
-     
+
      
         # 예측값에 따라 dict 형태로 예측값 저장
 
@@ -307,45 +301,9 @@ class Predict:
             elif str(real_word_box[i])=='money':
                 output_dict['money'].append(text[i])
 
-        
-                
-        '''                
-        csv_dict={}
-        
-        for i in range(len(output_dict['column_name'])):
-            if i==0:
-                csv_dict[i]=output_dict['item']
-            elif i==1:
-                csv_dict[i]=output_dict['count']
-            elif i ==2:
-                csv_dict[i]=output_dict['money']
-        
-        '''
-        
-        # 2개씩 나누기
-        #print('2개로 나누기 이전의 ',output_dict['column_name'])
-        #output_dict['column_name'] = result = [output_dict['column_name'][0][i:i+2] for i in range(0, len(output_dict['column_name'][0]), 2)]
-
-        #new process for ':' problem 
         new_key = []
         previous_word = None
 
-        '''
-        for word in output_dict['key']:
-            if ':' in word:
-                previous_word = word.split(':')[0].strip()
-            else:
-                if previous_word:
-                    word = previous_word + word
-                new_key.append(word)
-
-        output_dict['key'] = new_key
-        '''
-        
-        #col_na=output_dict['column_name']
-        #print('col_na',col_na)
-        
-        #output_dict['column_name']=[col_na[i] + col_na[i+1] for i in range(0, len(col_na), 2)]
 
         print("output is : \n",output_dict)
         try:
