@@ -147,8 +147,8 @@ class Predict:
         encoded_inputs = self.processor(self.image, preprocess_data['words'], boxes=preprocess_data['bboxes'], word_labels=preprocess_data['ner_tags'],
                            padding="max_length", truncation=True, return_tensors="pt")
         
-        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
+        device = torch.device('cpu')
+        print("here is devide",device)
         labels = encoded_inputs.pop('labels').squeeze().tolist()
         id2label = {v: k for v, k in enumerate(self.label_list)}
         label2id = {k: v for v, k in enumerate(self.label_list)}
@@ -365,7 +365,17 @@ class Predict:
             # Return output_dict and DataFrame as CSV string
             
             output_dict['csv']=csv_string
-            return output_dict
+            return_dict={}
+            return_dict['total']=output_dict['total']
+            
+            return_dict['total'][0] = return_dict['total'][0].replace(',', '')  # Remove commas from the string
+            return_dict['total'][0] = return_dict['total'][0].replace('.', '')
+            return_dict['total'][0] = return_dict['total'][0].replace('원', '')
+            return_dict['total'][0] = return_dict['total'][0].replace(' ', '')
+            return_dict['total'][0]=int(return_dict['total'][0])
+            return_dict['key_value']=output_dict['key_value']
+            return_dict['csv']=output_dict['csv']
+            return return_dict
 
         except Exception as e:
             # Handle the exception
