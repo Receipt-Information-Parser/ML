@@ -1,0 +1,8 @@
+requests
+-f https://download.pytorch.org/whl/torch_stable.htm
+transformers
+torch
+pandas
+Pillow
+fastapi
+boto3
