@@ -1,7 +1,19 @@
 # ML
 
-## 참고할 OCR 자료 링크
+## RIP ML
+* model 
+> layoutlmv3 base pretrained model fine-tuning 
 
+* team members
+
+
+[하승원](https://github.com/ha-seungwon)
+ 
+[허찬용](https://github.com/H-ChanY)
+
+
+
+## 참고할 OCR 자료 링크
 * https://m.blog.naver.com/PostView.naver?isHttpsRedirect=true&blogId=youseok0&logNo=221566757079 (OCR 기술 관련 블로그)
 * https://github.com/clovaai/donut (클로바 donut)
 * https://arxiv.org/pdf/2111.15664.pdf (클로바 donut Paper)
@@ -13,7 +25,6 @@
 * https://velog.io/@shasha/%ED%95%9C%EA%B8%80-OCR-CRNN-Model-%ED%95%99%EC%8A%B5
 * https://yunwoong.tistory.com/210
 * https://medium.com/@msmapark2/character-region-awareness-for-text-detection-craft-paper-%EB%B6%84%EC%84%9D-da987b32609c (CRAFT 논문 리뷰)
-<<<<<<< HEAD
-=======
-* https://github.com/monologg/korean-ner-pytorch (NER)
->>>>>>> b78d694aed6322e17ab1a6e7f8291e12a13c34c6
+
+
+
